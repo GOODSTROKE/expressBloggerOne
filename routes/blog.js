@@ -1,20 +1,71 @@
 // remember the uuid not uuidv4 ***
 
-const express = require('express');
-const router = express.Router();
+const express = require('express')
+const router = express.Router()
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.json({sucess: true, route: "blogs", message:"welcome to the blogs page"});
-});
+const blogSchema = require('../model/blogs')
 
-
-
-router.get("/all", async function (req,res,next){
-
+router.get('/all', async (req, res) => {
+  try {
+    const blogs = await blogSchema.find()
+    if (!blogs.length) {
+      return res.send('No blogs found')
+    }
+    return res.send({ data: blogs })
+  } catch (error) {
+    return res.send('Server error!')
+  }
 })
 
+router.get('/get-one/', async (req, res) => {
+  try {
+    const blog = await blogSchema.findOne()
+    if (!blog) return res.send('Blog not found for this id!')
 
+    return res.send({ data: blog })
+  } catch (error) {
+    return res.send('Server error!')
+  }
+})
+
+router.get('/get-one/:id', async (req, res) => {
+  try {
+    const blogId = req.params.id
+    if (!blogId) return res.send('Blog id is required!')
+
+    const blog = await blogSchema.findById(blogId)
+    if (!blog) return res.send('Blog not found for this id!')
+
+    return res.send({ data: blog })
+  } catch (error) {
+    return res.send('Server error!')
+  }
+})
+
+router.post('/create-one', async (req, res) => {
+  try {
+    const { heading, description, title, text, author, category } = req.body
+    if (!heading || !description || !title || !text || !author || !category) {
+      return res.send('All fields are required')
+    }
+
+    const blog = new blogSchema(req.body)
+    await blog.save()
+
+    return res.send({ message: 'New record saved!', data: blog })
+  } catch (error) {
+    return res.send('Server error!')
+  }
+})
+
+/* GET users listing. */
+// router.get('/', function(req, res, next) {
+//   res.json({sucess: true, route: "blogs", message:"welcome to the blogs page"});
+// });
+
+// router.get("/all", async function (req,res,next){
+
+// })
 
 /* 
 
@@ -44,19 +95,18 @@ router.get("/all", async function (req,res,next){
   }); /*.catch({
     console.log("something went wrong");
   });*/
-  // console.log("second");
-  //we don't want to a user to see the result before post is loaded.
-  // so we use await, to block this from happening.
-  // res.json({
-  //  success: true,
-  //  posts: blogPosts,
-  // });
-  
-  //NOTE: FIND ONE is READ operation, the output holds the results of the operation.
-  // so we add it in our res.json()
-  // console.log("third");
-  // });
+// console.log("second");
+//we don't want to a user to see the result before post is loaded.
+// so we use await, to block this from happening.
+// res.json({
+//  success: true,
+//  posts: blogPosts,
+// });
 
+//NOTE: FIND ONE is READ operation, the output holds the results of the operation.
+// so we add it in our res.json()
+// console.log("third");
+// });
 
 // CREATE
 
@@ -109,5 +159,4 @@ router.delete('/delete-multi', async function (req, res) {
 })
 */
 
-
-module.exports = router;
+module.exports = router
