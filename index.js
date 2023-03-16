@@ -1,21 +1,29 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const app = express();
+const express = require('express')
+const mongoose = require('mongoose')
+const blogRouter = require('./routes/blog')
+// const indexRouter = require('./routes/index')
+const usersRouter = require('./routes/users')
+const app = express()
+require('dotenv').config()
 
-const uri =
-  "mongodb+srv://goodstroke:WTEuOOlvBoec1nyu@cluster1.toqnmwk.mongodb.net/?retryWrites=true&w=majority";
+const uri = process.env.MONGO_URI
+const PORT = process.env.PORT
 
 async function connect() {
   try {
-    await mongoose.connect(uri);
-    console.log("Connected to MongoDB");
+    await mongoose.connect(uri)
+    console.log('Connected to MongoDB')
   } catch (error) {
-    console.error(error);
+    console.error(error)
   }
 }
 
-connect();
+connect()
 
-app.listen(3000, () => {
-  console.log("Server started on port 8000");
-});
+// app.use('/', indexRouter)
+app.use('/blogs', blogRouter)
+app.use('/users', usersRouter)
+
+app.listen(PORT, () => {
+  console.log(`Server started on port: ${PORT}`)
+})
